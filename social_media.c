@@ -38,6 +38,9 @@ int main(void)
 	init_tasks();
 
 	char *input = (char *)malloc(MAX_COMMAND_LEN);
+	post_t *posts[1000];
+	(void)posts;
+	int size = -1;
 	while (1) {
 		char *command = fgets(input, MAX_COMMAND_LEN, stdin);
 
@@ -50,14 +53,14 @@ int main(void)
 		#endif
 
 		#ifdef TASK_2
-		handle_input_posts(input);
+		size = handle_input_posts(posts, input);
 		#endif
 
 		#ifdef TASK_3
 		handle_input_feed(input);
 		#endif
 	}
-
+	free_all_memory(posts, size);
 	free_users();
 	free(input);
 
