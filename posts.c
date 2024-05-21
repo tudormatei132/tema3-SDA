@@ -216,7 +216,14 @@ void delete_node(tree_t *tree, tree_node_t *node)
 	}
 	free_tree(node);
 }
-
+void free_all_memory(post_t **posts, int size)
+{
+	for (int i = 0; i < size; i++) {
+		free_tree(posts[i]->tree->root);
+		free(posts[i]->tree);
+		free(posts[i]);
+	}
+}
 
 
 int handle_input_posts(post_t **posts, char *input)
@@ -396,11 +403,3 @@ int handle_input_posts(post_t **posts, char *input)
 	return size;
 }
 
-void free_all_memory(post_t **posts, int size)
-{
-	for (int i = 0; i < size; i++) {
-		free_tree(posts[i]->tree->root);
-		free(posts[i]->tree);
-		free(posts[i]);
-	}
-}

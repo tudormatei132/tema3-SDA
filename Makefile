@@ -9,10 +9,9 @@ build: friends posts feed
 
 # Object files
 UTILS = users.o
-COMMON_OBJS = posts.o
-FRIENDS_OBJS = $(UTILS) friends.o social_media_friends.o $(COMMON_OBJS)
-POSTS_OBJS = $(UTILS) posts.o social_media_posts.o
-FEED_OBJS = $(UTILS) posts.o friends.o feed.o social_media_feed.o $(COMMON_OBJS)
+FRIENDS_OBJS = friends.o social_media_friends.o $(UTILS)
+POSTS_OBJS = posts.o social_media_posts.o $(UTILS)
+FEED_OBJS = feed.o friends.o posts.o social_media_feed.o $(UTILS)
 
 friends: $(FRIENDS_OBJS)
 	$(CC) $(CFLAGS) -o $@ $^

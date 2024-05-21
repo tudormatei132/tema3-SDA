@@ -22,7 +22,7 @@ void handle_input_feed(char *input)
 	else if (!strcmp(cmd, "friends-repost"))
 		(void)cmd;
 		// TODO: Add function
-	else if (!strcmp(cmd, "common-groups"))
+	else if (!strcmp(cmd, "common-group"))
 		(void)cmd;
 		// TODO: Add function
 
