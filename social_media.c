@@ -34,10 +34,12 @@ void init_tasks(void)
 int main(void)
 {
 	init_users();
-
+	
 	init_tasks();
 
 	char *input = (char *)malloc(MAX_COMMAND_LEN);
+	matrix_graph_t *mg = mg_create(MAX_PEOPLE);
+	
 	while (1) {
 		char *command = fgets(input, MAX_COMMAND_LEN, stdin);
 
@@ -46,7 +48,7 @@ int main(void)
 			break;
 
 		#ifdef TASK_1
-		handle_input_friends(input);
+		handle_input_friends(input, mg);
 		#endif
 
 		#ifdef TASK_2
@@ -57,7 +59,8 @@ int main(void)
 		handle_input_feed(input);
 		#endif
 	}
-
+	
+	mg_free(mg);
 	free_users();
 	free(input);
 
