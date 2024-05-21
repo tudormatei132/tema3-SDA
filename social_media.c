@@ -9,7 +9,6 @@
 #include "friends.h"
 #include "posts.h"
 #include "feed.h"
-
 /**
  * Initializez every task based on which task we are running
 */
@@ -34,12 +33,18 @@ void init_tasks(void)
 int main(void)
 {
 	init_users();
-	
+
 	init_tasks();
 
 	char *input = (char *)malloc(MAX_COMMAND_LEN);
+	#ifdef TASK_2
+	post_t *posts[1000];
+	(void)posts;
+	#endif
+	#ifdef TASK_1
 	matrix_graph_t *mg = mg_create(MAX_PEOPLE);
-	
+	#endif
+	int size = -1;
 	while (1) {
 		char *command = fgets(input, MAX_COMMAND_LEN, stdin);
 
@@ -52,15 +57,20 @@ int main(void)
 		#endif
 
 		#ifdef TASK_2
-		handle_input_posts(input);
+		size = handle_input_posts(posts, input);
 		#endif
 
 		#ifdef TASK_3
 		handle_input_feed(input);
 		#endif
 	}
-	
+	#ifdef TASK_1
 	mg_free(mg);
+	#endif
+	#ifdef TASK_2
+	free_all_memory(posts, size);
+	#endif
+	(void)size;
 	free_users();
 	free(input);
 
