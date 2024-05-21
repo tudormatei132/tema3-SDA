@@ -37,12 +37,12 @@ int main(void)
 	init_tasks();
 
 	char *input = (char *)malloc(MAX_COMMAND_LEN);
+	#ifdef TASK_1
+	matrix_graph_t *mg = mg_create(MAX_PEOPLE);
+	#endif
 	#ifdef TASK_2
 	post_t *posts[1000];
 	(void)posts;
-	#endif
-	#ifdef TASK_1
-	matrix_graph_t *mg = mg_create(MAX_PEOPLE);
 	#endif
 	int size = -1;
 	while (1) {
