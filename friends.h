@@ -13,7 +13,7 @@ typedef struct
 matrix_graph_t *mg_create(int nodes);
 
 void mg_free(matrix_graph_t *graph);
-
+int friends(char *name1, matrix_graph_t *mg);
 /**
  * Function that handles the calling of every command from task 1
  *

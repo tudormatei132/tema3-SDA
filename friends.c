@@ -240,21 +240,22 @@ void remove_friend(char *cmd, matrix_graph_t *mg)
 
 void suggestions(char *cmd, matrix_graph_t *mg)
 {
-	cmd = strtok(NULL, "\n "); //get the name
+	cmd = strtok(NULL, "\n "); // get the name
 	char *name1 = strdup(cmd);
 
-	int id1 = get_user_id(name1); //get the id of the name
+	int id1 = get_user_id(name1); // get the id of the name
 
-	//the array in which we save 1 for the possible friends
+	// the array in which we save 1 for the possible friends
 	int *possible_friends = calloc(mg->nodes, sizeof(int));
 
-	int ok = 1; //verifies that there is a possible friend
+	int ok = 1; // verifies that there is a possible friend
 	for (int i = 0; i < mg->nodes; i++) {
-		if (mg->matrix[id1][i]) //for every friend
+		if (mg->matrix[id1][i]) // for every friend
 			for (int j = 0; j < mg->nodes; j++)
-				if (mg->matrix[i][j] == 1) { //go through all friends' friends
+				if (mg->matrix[i][j] == 1 && mg->matrix[id1][j] == 0 &&
+					j != id1) { // go through all friends' friends
 					possible_friends[j] = 1; //update the variables
-					ok = 0; //there is at least one friend
+					ok = 0; // there is at least one friend
 				}
 	}
 
@@ -262,8 +263,8 @@ void suggestions(char *cmd, matrix_graph_t *mg)
 		printf("Suggestions for %s:\n", name1);
 		//go through the array of possible friends
 		for (int i = 0; i < mg->nodes; i++)
-			//if the value is 1 and it is not friend with out initial name
-			if (possible_friends[i] == 1 && i != id1 && mg->matrix[id1][i] == 0)
+			//if the value is 1 and it is not friend with our initial name
+			if (possible_friends[i] == 1)
 				printf("%s\n", get_user_name(i));
 	} else {
 		printf("There are no suggestions for %s\n", name1);
@@ -283,7 +284,7 @@ void distance(char *cmd, matrix_graph_t *mg)
 	int id1 = get_user_id(name1); //get the id of each name
 	int id2 = get_user_id(name2);
 
-	/* array in which is safed the distance from name1
+	/* array in which is saved the distance from name1
 	to every other name
 	-> the vector is initialized in dfs with INF = 999
 	on every position
@@ -291,7 +292,7 @@ void distance(char *cmd, matrix_graph_t *mg)
 	int *distance = malloc(sizeof(int) * mg->nodes);
 	dfs(mg, id1, distance);
 
-	//if there is no link between the 2 names the value is INF
+	// if there is no link between the 2 names the value is INF
 	if (distance[id2] != INF)
 		printf("The distance between %s - %s is %d\n",
 			   name1, name2, distance[id2]);

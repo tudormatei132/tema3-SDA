@@ -1,0 +1,3 @@
+./posts.c:224: ERROR:INITIALISED_STATIC: do not initialise statics to 0
+./posts.c:225: ERROR:INITIALISED_STATIC: do not initialise statics to 0
+./posts.c:388: WARNING:LONG_FUNCTION: 'handle_input_posts' function definition is 167 lines, perhaps refactor
