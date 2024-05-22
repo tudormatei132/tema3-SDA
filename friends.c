@@ -250,9 +250,10 @@ void suggestions(char *cmd, matrix_graph_t *mg)
 
 	int ok = 1; //verifies that there is a possible friend
 	for (int i = 0; i < mg->nodes; i++) {
-		if (mg->matrix[id1][i]) //for every friend
+		if (mg->matrix[id1][i] && i != id1) //for every friend
 			for (int j = 0; j < mg->nodes; j++)
-				if (mg->matrix[i][j] == 1) { //go through all friends' friends
+				//go through all friends' friends
+				if (mg->matrix[i][j] == 1 && id1 != j) {
 					possible_friends[j] = 1; //update the variables
 					ok = 0; //there is at least one friend
 				}
