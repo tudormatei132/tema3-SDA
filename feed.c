@@ -34,7 +34,6 @@ void show_profile(post_t **posts, int size, int uid)
 		post_t *temp = posts[i]->tree->root->data;
 		search_reposts(posts[i]->tree->root, uid, temp->title);
 	}
-	
 }
 
 int *who_reposted(tree_node_t *node, int *v_size)
