@@ -1,3 +1,13 @@
+./feed.h:10: CHECK:LONG_LINE: line length of 83 exceeds 80 columns
 ./posts.c:224: ERROR:INITIALISED_STATIC: do not initialise statics to 0
 ./posts.c:225: ERROR:INITIALISED_STATIC: do not initialise statics to 0
 ./posts.c:388: WARNING:LONG_FUNCTION: 'handle_input_posts' function definition is 167 lines, perhaps refactor
+./feed.c:17: WARNING:BRACES: braces {} are not necessary for any arm of this statement
+./feed.c:23: WARNING:BRACES: braces {} are not necessary for single statement blocks
+./feed.c:28: CHECK:LINE_SPACING: Please don't use multiple blank lines
+./feed.c:37: CHECK:LINE_SPACING: Please don't use multiple blank lines
+./feed.c:64: CHECK:LONG_LINE: line length of 82 exceeds 80 columns
+./feed.c:87: ERROR:TRAILING_WHITESPACE: trailing whitespace
+./feed.c:88: ERROR:TRAILING_WHITESPACE: trailing whitespace
+./feed.c:88: CHECK:LINE_SPACING: Please don't use multiple blank lines
+./feed.c:89: CHECK:BRACES: Blank lines aren't necessary before a close brace '}'
