@@ -217,57 +217,119 @@ void delete_node(tree_t *tree, tree_node_t *node)
 	free_tree(node);
 }
 
+void create_post(post_t **posts, char *cmd, int *size, int *post_no)
+{
+	cmd = strtok(NULL, "\n ");
+	char *name = strdup(cmd);
+	int uid = get_user_id(cmd);
+	cmd = strtok(NULL, "\n");
+	char *title = get_title(cmd);
+	post_t post;
+	post.uid = uid;
+	post.id = *post_no + 1;
+	post.title = title;
+	post.likes = 0;
+	post.ppl = NULL;
+	posts[*size] = malloc(sizeof(post_t));
+	memcpy(posts[*size], &post, sizeof(post_t));
+	posts[*size]->tree = init_tree(sizeof(post_t));
+	add_node(posts[*size]->tree, &post, -1);
+	(*post_no)++;
+	(*size)++;
+	printf(CREATE_FORMAT, title, name);
+	free(name);
+}
+
+void create_repost(post_t **posts, char *cmd, int *size, int *post_no)
+{
+	cmd = strtok(NULL, "\n ");
+	char *name = strdup(cmd);
+	cmd = strtok(NULL, "\n ");
+	int root = atoi(cmd);
+	cmd = strtok(NULL, "\n ");
+	int node = root;
+	if (cmd)
+		node = atoi(cmd);
+
+	post_t post;
+	post.title = NULL;
+	post.likes = 0;
+	post.ppl = NULL;
+	post.id = ++(*post_no);
+	post.uid = get_user_id(name);
+	for (int i = 0; i < *size; i++) {
+		if (posts[i]->id == root)
+			add_node(posts[i]->tree, &post, node);
+	}
+	printf(REPOST_FORMAT, post.id, name);
+	free(name);
+}
+
+void delete_post(post_t **posts, char *cmd, int *size)
+{
+	cmd = strtok(NULL, "\n ");
+	int root = atoi(cmd);
+	int node = root;
+	cmd = strtok(NULL, "\n ");
+	if (cmd)
+		node = atoi(cmd);
+	for (int i = 0; i < *size; i++) {
+		if (posts[i]->id == root) {
+			tree_node_t *del = search(posts[i]->tree->root, node);
+			post_t *temp1 = del->data;
+			char *title = NULL;
+			if (temp1->title)
+				title = strdup(temp1->title);
+			delete_node(posts[i]->tree, del);
+
+			if (title) {
+				printf(DELETE_POST, title);
+				for (int j = i; j < *size - 1; j++)
+					posts[j] = posts[j + 1];
+				free(title);
+				(*size)--;
+			} else {
+				printf(DELETE_REPOST, node, posts[i]->title);
+			}
+		}
+	}
+}
+
+void get_reposts(post_t **posts, char *cmd, int size)
+{
+	cmd = strtok(NULL, "\n ");
+	int root = atoi(cmd);
+	int node = root;
+	cmd = strtok(NULL, "\n ");
+	if (cmd)
+		node = atoi(cmd);
+	for (int i = 0; i < size; i++) {
+		if (posts[i]->id == root) {
+			tree_node_t *temp1 = search(posts[i]->tree->root, node);
+			post_t *temp = temp1->data;
+			char *name = get_user_name(temp->uid);
+			if (temp->title)
+				printf(GET_REPOST_TITLE, temp->title, name);
+			else
+				printf(GET_REPOST_FORMAT, temp->id, name);
+			print_children(temp1);
+			break;
+		}
+	}
+}
+
 int handle_input_posts(post_t **posts, char *input)
 {
 	char *commands = strdup(input);
 	char *cmd = strtok(commands, "\n ");
-	static int post_no = 0;
-	static int size = 0;
+	static int post_no, size;
 	if (!cmd)
 		return -1;
 
 	if (!strcmp(cmd, "create")) {
-		cmd = strtok(NULL, "\n ");
-		char *name = strdup(cmd);
-		int uid = get_user_id(cmd);
-		cmd = strtok(NULL, "\n");
-		char *title = get_title(cmd);
-		post_t post;
-		post.uid = uid;
-		post.id = post_no + 1;
-		post.title = title;
-		post.likes = 0;
-		post.ppl = NULL;
-		posts[size] = malloc(sizeof(post_t));
-		posts[size]->tree = init_tree(sizeof(post_t));
-		add_node(posts[size]->tree, &post, -1);
-		post_no++;
-		size++;
-		printf(CREATE_FORMAT, title, name);
-		free(name);
+		create_post(posts, cmd, &size, &post_no);
 	} else if (!strcmp(cmd, "repost")) {
-		cmd = strtok(NULL, "\n ");
-		char *name = strdup(cmd);
-		cmd = strtok(NULL, "\n ");
-		int root = atoi(cmd);
-		cmd = strtok(NULL, "\n ");
-		int node = root;
-		if (cmd)
-			node = atoi(cmd);
-
-		post_t post;
-		post.title = NULL;
-		post.likes = 0;
-		post.ppl = NULL;
-		post.id = ++post_no;
-		post.uid = get_user_id(name);
-		for (int i = 0; i < size; i++) {
-			post_t *temp = posts[i]->tree->root->data;
-			if (temp->id == root)
-				add_node(posts[i]->tree, &post, node);
-		}
-		printf(REPOST_FORMAT, post.id, name);
-		free(name);
+		create_repost(posts, cmd, &size, &post_no);
 	} else if (!strcmp(cmd, "common-repost")) {
 		cmd = strtok(NULL, "\n ");
 		int root = atoi(cmd);
@@ -277,14 +339,11 @@ int handle_input_posts(post_t **posts, char *input)
 		int id2 = atoi(cmd);
 		int res;
 		for (int i = 0; i < size; i++) {
-			post_t *temp = posts[i]->tree->root->data;
-			if (temp->id == root)
+			if (posts[i]->id == root)
 				res = first_common_repost(posts[i]->tree->root, id1, id2);
 		}
 		printf(COMMON_REPOST, id1, id2, res);
-	}
-		// TODO: Add function
-	else if (!strcmp(cmd, "like")) {
+	} else if (!strcmp(cmd, "like")) {
 		cmd = strtok(NULL, "\n ");
 		char *name = strdup(cmd);
 		cmd = strtok(NULL, "\n ");
@@ -315,33 +374,7 @@ int handle_input_posts(post_t **posts, char *input)
 			}
 		}
 	} else if (!strcmp(cmd, "delete")) {
-		cmd = strtok(NULL, "\n ");
-		int root = atoi(cmd);
-		int node = root;
-		cmd = strtok(NULL, "\n ");
-		if (cmd)
-			node = atoi(cmd);
-		for (int i = 0; i < size; i++) {
-			post_t *temp = posts[i]->tree->root->data;
-			if (temp->id == root) {
-				tree_node_t *del = search(posts[i]->tree->root, node);
-				post_t *temp1 = del->data;
-				char *title = NULL;
-				if (temp1->title)
-					title = strdup(temp1->title);
-				delete_node(posts[i]->tree, del);
-
-				if (title) {
-					printf(DELETE_POST, title);
-					for (int j = i; j < size - 1; j++)
-						posts[j] = posts[j + 1];
-					free(title);
-					size--;
-				} else {
-					printf(DELETE_REPOST, node, temp->title);
-				}
-			}
-		}
+		delete_post(posts, cmd, &size);
 	} else if (!strcmp(cmd, "get-likes")) {
 		cmd = strtok(NULL, "\n ");
 		int root = atoi(cmd);
@@ -350,10 +383,9 @@ int handle_input_posts(post_t **posts, char *input)
 		if (cmd)
 			node = atoi(cmd);
 		for (int i = 0; i < size; i++) {
-			post_t *temp = posts[i]->tree->root->data;
-			if (temp->id == root) {
+			if (posts[i]->id == root) {
 				tree_node_t *get = search(posts[i]->tree->root, node);
-				temp = get->data;
+				post_t *temp = get->data;
 				if (temp->title)
 					printf(GET_POST_LIKES, temp->title, temp->likes);
 				else
@@ -362,26 +394,7 @@ int handle_input_posts(post_t **posts, char *input)
 			}
 		}
 	} else if (!strcmp(cmd, "get-reposts")) {
-		cmd = strtok(NULL, "\n ");
-		int root = atoi(cmd);
-		int node = root;
-		cmd = strtok(NULL, "\n ");
-		if (cmd)
-			node = atoi(cmd);
-		for (int i = 0; i < size; i++) {
-			post_t *temp = posts[i]->tree->root->data;
-			if (temp->id == root) {
-				tree_node_t *temp1 = search(posts[i]->tree->root, node);
-				temp = temp1->data;
-				char *name = get_user_name(temp->uid);
-				if (temp->title)
-					printf(GET_REPOST_TITLE, temp->title, name);
-				else
-					printf(GET_REPOST_FORMAT, temp->id, name);
-				print_children(temp1);
-				break;
-			}
-		}
+		get_reposts(posts, cmd, size);
 	}
 	free(commands);
 	return size;
