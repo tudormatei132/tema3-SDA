@@ -13,12 +13,13 @@
 
 void search_reposts(tree_node_t *root, int uid, char *title)
 {
+	// find all reposts of a user in a tree, recursively
 	post_t *temp = root->data;
 	if (temp->uid == uid) {
 		if (!temp->title)
 			printf(SHOW_REPOST, title);
 	}
-
+	// start from the root, then search it through its children
 	for (int i = 0; i < root->n_children; i++)
 		search_reposts(root->children[i], uid, title);
 }
@@ -26,13 +27,12 @@ void search_reposts(tree_node_t *root, int uid, char *title)
 void show_profile(post_t **posts, int size, int uid)
 {
 	for (int i = 0; i < size; i++) {
-		post_t *temp = posts[i]->tree->root->data;
-		if (temp->uid == uid)
-			printf(SHOW_POST, temp->title);
+		// find all posts first
+		if (posts[i]->uid == uid)
+			printf(SHOW_POST, posts[i]->title);
 	}
 	for (int i = 0; i < size; i++) {
-		post_t *temp = posts[i]->tree->root->data;
-		search_reposts(posts[i]->tree->root, uid, temp->title);
+		search_reposts(posts[i]->tree->root, uid, posts[i]->title);
 	}
 }
 
@@ -40,10 +40,11 @@ int *who_reposted(tree_node_t *node, int *v_size)
 {
 	(*v_size) = 0;
 	int *result = malloc(sizeof(int));
+	// forms an array of people that reposted a post/repost
 	for (int i = 0; i < node->n_children; i++) {
 		post_t *temp = node->children[i]->data;
 		(*v_size)++;
-
+		// add the uid of every child to the array
 		if ((*v_size) > 1)
 			result = realloc(result, sizeof(int) * (*v_size));
 		result[(*v_size) - 1] = temp->uid;
@@ -56,7 +57,9 @@ void reposts_by_friends(matrix_graph_t *mg, tree_node_t *node, int uid)
 	int v_size;
 	int *repost = who_reposted(node, &v_size);
 	for (int i = 0; i < v_size; i++) {
-		if (mg->matrix[uid][repost[i]])
+		// go through our array of people who reposted
+		// check if there are any friends and print their name
+		if (mg->matrix[uid][repost[i]]) 
 			printf("%s\n", get_user_name(repost[i]));
 	}
 	free(repost);
@@ -202,7 +205,7 @@ void common_groups(char *cmd, matrix_graph_t *mg)
 	int id1 = get_user_id(name1);
 
 	//if he doesn't have friends, he's solo
-	//this if safes time and memory
+	//this if saves time and memory
 	if (friends(name1, mg) == 0) {
 		printf("%s\n", name1);
 		free(name1);
@@ -268,11 +271,13 @@ void handle_input_feed(matrix_graph_t *mg, post_t **posts,
 
 		int feed_size = atoi(cmd);
 		for (int j = *size - 1; j >= 0 && feed_size; j--) {
-			post_t *temp = posts[j]->tree->root->data;
-			if (temp->uid == uid || mg->matrix[uid][temp->uid]) {
-				char *name = get_user_name(temp->uid);
+			// find the most recent posts
+			// so we need to start our search from the end of the array
+			if (posts[j]->uid == uid || mg->matrix[uid][posts[j]->uid]) {
+
+				char *name = get_user_name(posts[j]->uid);
 				feed_size--;
-				printf(GET_FEED, name, temp->title);
+				printf(GET_FEED, name, posts[j]->title);
 			}
 		}
 	} else if (!strcmp(cmd, "view-profile")) {

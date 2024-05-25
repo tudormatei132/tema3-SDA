@@ -86,11 +86,13 @@ int first_common_repost(tree_node_t *root, int id1, int id2)
 	post_t *temp = root->data;
 	for (int i = 0; i < root->n_children; i++) {
 		if (search(root->children[i], id1) && search(root->children[i], id2)) {
+			// if we find both nodes in the same subtree, then we need to
+			// lower the level of the first common ancestor
 			found = i;
 			break;
 		}
 	}
-	if (found == -1)
+	if (found == -1) // if we can't find both nodes below, then stop
 		return temp->id;
 	return first_common_repost(root->children[found], id1, id2);
 }
@@ -126,18 +128,22 @@ void manage_like(tree_node_t *liked, char *name, char *title)
 	int uid = get_user_id(name);
 	int found = is_in_array(temp->ppl, temp->likes, uid);
 	if (found == -1) {
+		// check if the person has already liked the post
+		// if they didn't, then add them to the list of 
+		// person who liked
 		temp->likes++;
 		if (temp->likes > 1)
 			temp->ppl = realloc(temp->ppl, temp->likes * sizeof(int));
 		else
 			temp->ppl = malloc(sizeof(int));
 		temp->ppl[temp->likes - 1] = uid;
-		if (temp->title)
+		if (temp->title) //check if it's a post or a repost
 			printf(LIKED_POST, name, temp->title);
 		else
 			printf(LIKED_REPOST, name, title);
 		return;
 	}
+	// remove the person from the list if they had already liked the post
 	del_elem(temp->ppl, temp->likes, found);
 	temp->likes--;
 	if (temp->likes)
@@ -155,6 +161,8 @@ int ratio(tree_node_t *root)
 	post_t *base = root->data;
 	int id = root->n_children;
 	int max = base->likes;
+	// check the children's like counter
+	// then compare it to the original post
 	for (int i = 0; i < root->n_children; i++) {
 		post_t *rep = root->children[i]->data;
 		if (max < rep->likes) {
@@ -201,6 +209,7 @@ void delete_node(tree_t *tree, tree_node_t *node)
 	tree_node_t *parent = search(tree->root, node->pid);
 	for (int i = 0; i < parent->n_children; i++) {
 		if (parent->children[i] == node) {
+			// remove the node from the children of its parent
 			for (int j = i; j < parent->n_children - 1; j++)
 				parent->children[j] = parent->children[j + 1];
 			parent->n_children--;
@@ -214,6 +223,7 @@ void delete_node(tree_t *tree, tree_node_t *node)
 			break;
 		}
 	}
+	//remove all the corresponding subtree
 	free_tree(node);
 }
 
@@ -225,15 +235,18 @@ void create_post(post_t **posts, char *cmd, int *size, int *post_no)
 	cmd = strtok(NULL, "\n");
 	char *title = get_title(cmd);
 	post_t post;
+
 	post.uid = uid;
 	post.id = *post_no + 1;
 	post.title = title;
 	post.likes = 0;
 	post.ppl = NULL;
+	// temporary post which will be the root of the new tree
 	posts[*size] = malloc(sizeof(post_t));
 	memcpy(posts[*size], &post, sizeof(post_t));
 	posts[*size]->tree = init_tree(sizeof(post_t));
 	add_node(posts[*size]->tree, &post, -1);
+	// increment the size and the next post/repost id
 	(*post_no)++;
 	(*size)++;
 	printf(CREATE_FORMAT, title, name);
@@ -250,7 +263,9 @@ void create_repost(post_t **posts, char *cmd, int *size, int *post_no)
 	int node = root;
 	if (cmd)
 		node = atoi(cmd);
-
+	// works the same way as the previous function
+	// but it adds the node to the array of children
+	// of its parent
 	post_t post;
 	post.title = NULL;
 	post.likes = 0;
@@ -275,6 +290,8 @@ void delete_post(post_t **posts, char *cmd, int *size)
 		node = atoi(cmd);
 	for (int i = 0; i < *size; i++) {
 		if (posts[i]->id == root) {
+			// find our post/repost in the array
+			// and then in the corresponding tree
 			tree_node_t *del = search(posts[i]->tree->root, node);
 			post_t *temp1 = del->data;
 			char *title = NULL;
@@ -283,6 +300,7 @@ void delete_post(post_t **posts, char *cmd, int *size)
 			delete_node(posts[i]->tree, del);
 
 			if (title) {
+				// if we deleted a post, then remove the element from the array
 				printf(DELETE_POST, title);
 				for (int j = i; j < *size - 1; j++)
 					posts[j] = posts[j + 1];
@@ -305,6 +323,8 @@ void get_reposts(post_t **posts, char *cmd, int size)
 		node = atoi(cmd);
 	for (int i = 0; i < size; i++) {
 		if (posts[i]->id == root) {
+			// search for the original post
+			// then use the function to search in the tree
 			tree_node_t *temp1 = search(posts[i]->tree->root, node);
 			post_t *temp = temp1->data;
 			char *name = get_user_name(temp->uid);
@@ -353,6 +373,8 @@ int handle_input_posts(post_t **posts, char *input)
 		if (cmd)
 			node = atoi(cmd);
 		for (int i = 0; i < size; i++) {
+			// search for the original post in the array
+			// then for the repost in the tree
 			post_t *temp = posts[i]->tree->root->data;
 			if (temp->id == root) {
 				tree_node_t *liked = search(posts[i]->tree->root, node);
