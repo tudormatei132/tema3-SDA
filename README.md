@@ -1,6 +1,6 @@
-Echipa tema 3 SD:
-tudor_andrei.matei
-id.2
+#### Echipa tema 3 SD:
+* tudor_andrei.matei
+* id.2
 
 ## Task 2
 * We will store our posts into an array of posts.
