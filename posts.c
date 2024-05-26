@@ -129,7 +129,7 @@ void manage_like(tree_node_t *liked, char *name, char *title)
 	int found = is_in_array(temp->ppl, temp->likes, uid);
 	if (found == -1) {
 		// check if the person has already liked the post
-		// if they didn't, then add them to the list of 
+		// if they didn't, then add them to the list of
 		// person who liked
 		temp->likes++;
 		if (temp->likes > 1)
@@ -345,7 +345,6 @@ int handle_input_posts(post_t **posts, char *input)
 	static int post_no, size;
 	if (!cmd)
 		return -1;
-
 	if (!strcmp(cmd, "create")) {
 		create_post(posts, cmd, &size, &post_no);
 	} else if (!strcmp(cmd, "repost")) {
@@ -375,10 +374,9 @@ int handle_input_posts(post_t **posts, char *input)
 		for (int i = 0; i < size; i++) {
 			// search for the original post in the array
 			// then for the repost in the tree
-			post_t *temp = posts[i]->tree->root->data;
-			if (temp->id == root) {
+			if (posts[i]->id == root) {
 				tree_node_t *liked = search(posts[i]->tree->root, node);
-				manage_like(liked, name, temp->title);
+				manage_like(liked, name, posts[i]->title);
 				free(name);
 			}
 		}
@@ -386,8 +384,7 @@ int handle_input_posts(post_t **posts, char *input)
 		cmd = strtok(NULL, "\n ");
 		int root = atoi(cmd);
 		for (int i = 0; i < size; i++) {
-			post_t *temp = posts[i]->tree->root->data;
-			if (temp->id == root) {
+			if (posts[i]->id == root) {
 				int ratiod = ratio(posts[i]->tree->root);
 				if (ratiod == -1)
 					printf(NOT_RATIOD);

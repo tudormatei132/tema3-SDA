@@ -31,9 +31,8 @@ void show_profile(post_t **posts, int size, int uid)
 		if (posts[i]->uid == uid)
 			printf(SHOW_POST, posts[i]->title);
 	}
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < size; i++)
 		search_reposts(posts[i]->tree->root, uid, posts[i]->title);
-	}
 }
 
 int *who_reposted(tree_node_t *node, int *v_size)
@@ -59,7 +58,7 @@ void reposts_by_friends(matrix_graph_t *mg, tree_node_t *node, int uid)
 	for (int i = 0; i < v_size; i++) {
 		// go through our array of people who reposted
 		// check if there are any friends and print their name
-		if (mg->matrix[uid][repost[i]]) 
+		if (mg->matrix[uid][repost[i]])
 			printf("%s\n", get_user_name(repost[i]));
 	}
 	free(repost);
@@ -274,7 +273,6 @@ void handle_input_feed(matrix_graph_t *mg, post_t **posts,
 			// find the most recent posts
 			// so we need to start our search from the end of the array
 			if (posts[j]->uid == uid || mg->matrix[uid][posts[j]->uid]) {
-
 				char *name = get_user_name(posts[j]->uid);
 				feed_size--;
 				printf(GET_FEED, name, posts[j]->title);
@@ -290,8 +288,7 @@ void handle_input_feed(matrix_graph_t *mg, post_t **posts,
 		cmd = strtok(NULL, "\n ");
 		int id = atoi(cmd);
 		for (int i = 0; i < *size; i++) {
-			post_t *temp = posts[i]->tree->root->data;
-			if (temp->id == id)
+			if (posts[i]->id == id)
 				reposts_by_friends(mg, posts[i]->tree->root, uid);
 		}
 	} else if (!strcmp(cmd, "common-group")) {
